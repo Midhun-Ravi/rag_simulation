@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RAG Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        text-align: center;
+        padding: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        background: #1e293b;
+    }
+
+    .container {
+        padding: 20px;
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .input-box {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    input {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #3b82f6;
+        color: white;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #2563eb;
+    }
+
+    .steps {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .step {
+        background: #1e293b;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        transition: 0.3s;
+    }
+
+    .active {
+        background: #3b82f6;
+    }
+
+    .card {
+        background: #1e293b;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+
+    .documents {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .doc {
+        background: #334155;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .highlight {
+        border: 2px solid #3b82f6;
+    }
+
+    .output {
+        background: #020617;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+        min-height: 60px;
+    }
+
+</style>
+</head>
+<body>
+
+<header>RAG (Retrieval-Augmented Generation) Simulator</header>
+
+<div class="container">
+
+    <div class="input-box">
+        <input id="query" placeholder="Ask something like 'What is RAG?'">
+        <button onclick="runRAG()">Run RAG</button>
+    </div>
+
+    <div class="steps">
+        <div class="step" id="step1">1. Query</div>
+        <div class="step" id="step2">2. Embedding</div>
+        <div class="step" id="step3">3. Retrieval</div>
+        <div class="step" id="step4">4. Context</div>
+        <div class="step" id="step5">5. Generation</div>
+    </div>
+
+    <div class="card">
+        <h3>Knowledge Base</h3>
+        <div class="documents" id="docs">
+            <div class="doc">RAG combines retrieval and generation to improve AI responses.</div>
+            <div class="doc">Embeddings convert text into numerical vectors.</div>
+            <div class="doc">Vector databases store embeddings for fast search.</div>
+            <div class="doc">LLMs generate answers using context.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Process Output</h3>
+        <div id="output" class="output"></div>
+    </div>
+
+</div>
+
+<script>
+    function highlightStep(stepId) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById(stepId).classList.add('active');
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function runRAG() {
+        let query = document.getElementById('query').value;
+        let output = document.getElementById('output');
+        let docs = document.querySelectorAll('.doc');
+
+        docs.forEach(d => d.classList.remove('highlight'));
+        output.innerHTML = "";
+
+        // Step 1: Query
+        highlightStep("step1");
+        output.innerHTML = `<b>User Query:</b> ${query}`;
+        await sleep(1000);
+
+        // Step 2: Embedding
+        highlightStep("step2");
+        output.innerHTML += `<br><b>Embedding:</b> Converting query into vector...`;
+        await sleep(1000);
+
+        // Step 3: Retrieval (simple keyword match simulation)
+        highlightStep("step3");
+        let relevantDocs = [];
+        docs.forEach(doc => {
+            if (doc.innerText.toLowerCase().includes(query.toLowerCase().split(" ")[0])) {
+                doc.classList.add('highlight');
+                relevantDocs.push(doc.innerText);
+            }
+        });
+
+        if (relevantDocs.length === 0) {
+            relevantDocs.push("No strong match found, using general knowledge.");
+        }
+
+        output.innerHTML += `<br><b>Retrieved Docs:</b><br>${relevantDocs.join("<br>")}`;
+        await sleep(1500);
+
+        // Step 4: Context
+        highlightStep("step4");
+        let context = relevantDocs.join(" ");
+        output.innerHTML += `<br><b>Context Built:</b> ${context}`;
+        await sleep(1500);
+
+        // Step 5: Generation
+        highlightStep("step5");
+        let answer = "Based on retrieved knowledge: " + context;
+        output.innerHTML += `<br><br><b>Final Answer:</b> ${answer}`;
+    }
+</script>
+
+</body>
+</html>
